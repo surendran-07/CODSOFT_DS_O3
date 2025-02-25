@@ -1,36 +1,41 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, r2_score
 
-# Load the dataset
-file_path = "advertising (2).csv"  # Update this with the correct path
-df = pd.read_csv(file_path)
+# Load the sales dataset
+sales_file_path = "advertising (2).csv"  # Update this with the correct path
+sales_df = pd.read_csv(sales_file_path)
 
-# Display basic information about the dataset
-df.info()
-print(df.head())
+# Remove duplicates and handle missing values
+sales_df = sales_df.drop_duplicates()
+sales_df = sales_df.dropna()
+
+# Save the cleaned sales dataset
+sales_df.to_csv("advertising_cleaned.csv", index=False)
 
 # Define features and target variable
-X = df[['TV', 'Radio', 'Newspaper']]
-y = df['Sales']
+X_sales = sales_df[['TV', 'Radio', 'Newspaper']]
+y_sales = sales_df['Sales']
 
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Split the sales data into training and testing sets
+X_train_sales, X_test_sales, y_train_sales, y_test_sales = train_test_split(X_sales, y_sales, test_size=0.2, random_state=42)
 
-# Train a Linear Regression model
-model = LinearRegression()
-model.fit(X_train, y_train)
+# Train a Random Forest Regressor model for sales prediction
+sales_model = RandomForestRegressor(n_estimators=100, random_state=42)
+sales_model.fit(X_train_sales, y_train_sales)
 
-# Make predictions
-y_pred = model.predict(X_test)
+# Make predictions for sales
+y_pred_sales = sales_model.predict(X_test_sales)
 
-# Evaluate the model
-mae = mean_absolute_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
+# Evaluate the sales model
+mae_sales = mean_absolute_error(y_test_sales, y_pred_sales)
+r2_sales = r2_score(y_test_sales, y_pred_sales)
 
-print(f"Mean Absolute Error: {mae}")
-print(f"R² Score: {r2}")
+print(f"Sales Prediction - Mean Absolute Error: {mae_sales}")
+print(f"Sales Prediction - R² Score: {r2_sales}")
 
-# Save the cleaned dataset
-df.to_csv("advertising_cleaned.csv", index=False)
+# Print actual vs predicted values for sales
+predictions_df_sales = pd.DataFrame({"Actual": y_test_sales.values, "Predicted": y_pred_sales})
+print("Sales - Actual vs Predicted:")
+print(predictions_df_sales.head(10))
